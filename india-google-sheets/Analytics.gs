@@ -7,7 +7,7 @@ function runIndiaScanner_(){
  if(prev.length===20&&z.c>Math.max.apply(null,prev)){setup="CLOSE_BREAKOUT_20";why="Close exceeded prior 20 closes";}
  else if(sma(20)&&cs.length>=21&&cs[cs.length-2]<sma(20)&&z.c>sma(20)){setup="RECLAIM_SMA20";why="Close crossed above SMA20";}
  else if(rsi!==""&&rsi<30){setup="RSI_OVERSOLD";why="RSI14 below 30; not a buy instruction";}
- const age=(Date.now()-z.d.getTime())/60000,status=age>stale?"STALE":(z.status==="AUTHORIZED_VENDOR"?"VENDOR_DATA_UNVERIFIED":"IMPORTED_UNVERIFIED");
+ const age=(Date.now()-z.d.getTime())/60000,status=age>stale?"STALE":(z.status==="VENDOR_RESPONSE_UNVERIFIED"?"VENDOR_RESPONSE_UNVERIFIED":"IMPORTED_UNVERIFIED");
  out.push([z.ex,z.seg,z.sym,z.d,z.c,sma(20),sma(50),rsi,atr,z.vol,setup,status,why]);
  });
  clearAndWrite_(IM.SHEETS.SCAN,["exchange","segment","symbol","last_timestamp","close","SMA20","SMA50","RSI14","ATR14","volume","setup","data_status","explanation"],out);
@@ -17,7 +17,7 @@ function rsiIM_(c,n){if(c.length<n+1)return "";let gain=0,loss=0;for(let i=c.len
 function atrIM_(a,n){if(a.length<n+1)return "";const t=[];for(let i=1;i<a.length;i++){const p=a[i-1].c,b=a[i];t.push(Math.max(b.h-b.l,Math.abs(b.h-p),Math.abs(b.l-p)));}return t.slice(-n).reduce((p,q)=>p+q,0)/n;}
 function runIndiaOptionsSummary_(){
  const v=SpreadsheetApp.getActive().getSheetByName(IM.SHEETS.DATA).getDataRange().getValues(),m={};
- v.slice(1).forEach(r=>{const typ=String(r[8]||"").toUpperCase(),seg=String(r[2]||"").toUpperCase();if(!seg.includes("FO")&&!["CE","PE","CALL","PUT"].includes(typ))return;const k=String(r[5]||r[4])+"|"+String(r[6]||"");(m[k]||(m[k]=[])).push({t:typ,k:Number(r[7]),oi:Number(r[14])||0,ts:asDateIM_(r[0]),status:r[16]});});
+ v.slice(1).forEach(r=>{const typ=String(r[8]||"").toUpperCase(),seg=String(r[2]||"").toUpperCase();if(!seg.includes("FO")&&!["CE","PE","CALL","PUT"].includes(typ))return;const k=String(r[5]||r[4])+"|"+String(r[6]||"");(m[k]||(m[k]=[])).push({t:typ,k:Number(r[7]),oi:Number(r[14])||0,ts:asDateIM_(r[0])});});
  const out=[];Object.keys(m).forEach(k=>{const a=m[k],ce=a.filter(x=>["CE","CALL"].includes(x.t)),pe=a.filter(x=>["PE","PUT"].includes(x.t)),co=ce.reduce((s,x)=>s+x.oi,0),po=pe.reduce((s,x)=>s+x.oi,0),strikes=[...new Set(a.map(x=>x.k).filter(x=>x>0))].sort((x,y)=>x-y);let pain="";
  if(strikes.length)pain=strikes.map(p=>({payout:a.reduce((s,x)=>s+((x.t==="CE"||x.t==="CALL")?Math.max(0,p-x.k):Math.max(0,x.k-p))*x.oi,0),p})).sort((x,y)=>x.payout-y.payout)[0].p;
  const dates=a.map(x=>x.ts).filter(Boolean).sort((x,y)=>y-x);out.push([k.split("|")[0],k.split("|")[1],co,po,co?po/co:"",pain,a.length,dates[0]||"","UNVERIFIED_IMPORT"]);
