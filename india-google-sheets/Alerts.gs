@@ -9,5 +9,13 @@ function checkIndiaAlerts(){
  }
  if(msgs.length&&email)MailApp.sendEmail(email,"India Market informational alert",msgs.join("\n"));
  logIM_("ALERTS","OK",msgs.length+" informational alert(s); no order action.",msgs.length);
- SpreadsheetApp.getUi().alert(msgs.length?msgs.join("\n"):"No alerts triggered; missing/stale prices are flagged.");
+}
+function installIndiaAlertTrigger(){
+ const exists=ScriptApp.getProjectTriggers().some(t=>t.getHandlerFunction()==="checkIndiaAlerts");
+ if(!exists)ScriptApp.newTrigger("checkIndiaAlerts").timeBased().everyMinutes(15).create();
+ logIM_("TRIGGER","OK",exists?"Alert trigger already exists.":"Installed 15-minute alert check. It checks imported rows only; it does not fetch market prices.",0);
+}
+function removeIndiaAlertTriggers(){
+ ScriptApp.getProjectTriggers().filter(t=>t.getHandlerFunction()==="checkIndiaAlerts").forEach(t=>ScriptApp.deleteTrigger(t));
+ logIM_("TRIGGER","OK","Removed India alert triggers.",0);
 }
