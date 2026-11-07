@@ -46,13 +46,18 @@ For technical indicators, import consistent daily OHLCV history per symbol. A si
 
 1. Create a blank Google Spreadsheet in Drive.
 2. Open Extensions > Apps Script. If unavailable, go to script.google.com and create a project; create/bind the project to your spreadsheet (or open Apps Script from the sheet when available).
-3. Create script files named Code.gs, Data.gs, Analytics.gs and Alerts.gs. Copy matching files from this folder.
+3. Create script files named Code.gs, Data.gs, Analytics.gs and Alerts.gs. Copy matching files from this folder. Open Project Settings > Show appsscript.json manifest file and replace the manifest with this folder's appsscript.json.
 4. Save and run setupIndiaDashboard once. Review the authorization prompt. Reload the spreadsheet.
 5. Confirm the India Market menu and tabs appear. This validates script-to-sheet setup only, not market data.
 6. Paste a permitted CSV with headers + rows into Import_Raw. Choose India Market > Process pasted CSV import.
 7. Choose Run scanner + options summary. Inspect Scanner, Options_Summary and Diagnostics. Imported rows remain unverified.
 8. For hypothetical sizing, enter a symbol, capital, risk %, entry and stop in Risk; run calculateRiskSizing from the Apps Script editor.
 9. Add an alert row: TRUE, NSE, RELIANCE, ABOVE, 1500 (illustrative threshold). Run Check price alerts after importing fresh data. Email is disabled unless alert_email is explicitly set.
+10. Optional: choose India Market > Install 15-minute alert check. This schedules alert evaluation against the last imported rows only; it does not fetch new quotes. Remove it with India Market > Remove alert trigger.
+
+## Optional GitHub-to-Apps-Script deployment with clasp
+
+For a repeatable local push (the spreadsheet itself remains in Google Drive): install Node.js, then run `npm install -g @google/clasp`; run `clasp login`; enable Apps Script API in your Google account settings; create or open a bound Apps Script project from the spreadsheet; copy its Script ID from Project Settings; in a local copy of this folder create `.clasp.json` containing `{\"scriptId\":\"YOUR_SCRIPT_ID\",\"rootDir\":\".\"}`; copy the four `.gs` files and `appsscript.json` into that root; run `clasp push`. The repository does not contain your private Script ID and no push has been executed from this session.
 
 ## Authorized vendor adapter
 
